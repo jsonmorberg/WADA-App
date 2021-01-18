@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "993265967479",
+    "project_id": "wada-63fe9",
+    "storage_bucket": "wada-63fe9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993265967479:android:0a2c6af82d484ac6a4c172",
+        "android_client_info": {
+          "package_name": "com.example.wada"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993265967479-hno8uh8fm1ck4bfujqg8825r8b7ebr3l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsgb7U3jF7JSufBBKL2ss9RmD0y1FP_kU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "993265967479-hno8uh8fm1ck4bfujqg8825r8b7ebr3l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
