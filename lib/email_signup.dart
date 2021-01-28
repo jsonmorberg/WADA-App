@@ -18,7 +18,6 @@ class _EmailSignUpState extends State<EmailSignUp> {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -71,25 +70,6 @@ class _EmailSignUpState extends State<EmailSignUp> {
                   Padding(
                     padding: EdgeInsets.all(20.0),
                     child: TextFormField(
-                      controller: ageController,
-                      decoration: InputDecoration(
-                        labelText: "Enter Age",
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Enter Age';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: TextFormField(
                       obscureText: true,
                       controller: passwordController,
                       decoration: InputDecoration(
@@ -131,12 +111,11 @@ class _EmailSignUpState extends State<EmailSignUp> {
 
   void registerToFb() {
     firebaseAuth
-        .createUserWithEmailAndPassword(
-        email: emailController.text, password: passwordController.text)
-        .then((result) {
-      dbRef.child(result.user.uid).set({
+          .createUserWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text)
+          .then((result) {
+        dbRef.child(result.user.uid).set({
         "email": emailController.text,
-        "age": ageController.text,
         "name": nameController.text
       }).then((res) {
         isLoading = false;
@@ -171,6 +150,5 @@ class _EmailSignUpState extends State<EmailSignUp> {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
-    ageController.dispose();
   }
 }
