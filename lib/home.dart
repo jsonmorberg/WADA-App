@@ -1,9 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:wada/water_stats.dart';
 import 'signup.dart';
+import 'dart:io';
+import 'dart:async';
+import 'dictionary.dart';
+import 'package:image_picker/image_picker.dart';
+import 'profile.dart';
 import 'placeholder_widget.dart';
-
 class Home extends StatelessWidget {
   Home({this.uid});
   final String uid;
@@ -56,9 +61,9 @@ class _HomeState extends State<HomeState> {
 
   int _currentIndex = 0;
   final List<Widget> _children = [
-    PlaceholderWidget(Colors.white),
-    PlaceholderWidget(Colors.deepOrange),
-    PlaceholderWidget(Colors.green)
+    MainPage(),
+    Dictionary(),
+    WaterStats()
   ];
   @override
   Widget build(BuildContext context) {
@@ -70,15 +75,15 @@ class _HomeState extends State<HomeState> {
         items: [
           new BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            title: Text('Home'),
+            title: Text('Plants'),
           ),
           new BottomNavigationBarItem(
             icon: Icon(Icons.mail),
-            title: Text('Messages'),
+            title: Text('Dictionary'),
           ),
           new BottomNavigationBarItem(
               icon: Icon(Icons.person),
-              title: Text('Profile')
+              title: Text('Water')
           )
         ],
       ),
@@ -87,6 +92,123 @@ class _HomeState extends State<HomeState> {
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
+      if(_currentIndex == 0) {
+        Widget build(BuildContext context) {
+          Text("text", textAlign: TextAlign.center,);
+        }
+      }
     });
+  }
+}
+
+
+
+class MainPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final title = 'Plants';
+
+    return MaterialApp(
+      title: title,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+        ),
+        body: GridView.count(
+          // Create a grid with 2 columns. If you change the scrollDirection to
+          // horizontal, this produces 2 rows.
+          crossAxisCount: 1,
+          // Generate 100 widgets that display their index in the List.
+          children: List.generate(100, (index) {
+            return Center(
+              child: Text(
+                'Item $index',
+                style: Theme.of(context).textTheme.headline5,
+              ),
+            );
+          }),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddPlant()),
+            );
+          },
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ),
+
+
+      ),
+    );
+  }
+
+}
+class AddPlant extends StatefulWidget {
+  AddPlant({Key key}) : super(key: key);
+
+  @override
+  _AddPlant createState() => _AddPlant();
+}
+
+class _AddPlant extends State {
+
+  File _image;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void open_camera()
+  async {
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    setState(() {
+      _image = image;
+    });
+
+  }
+  void open_gallery()
+  async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image = image;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(title: Text("Add plant profile"),
+          backgroundColor: Colors.black45,),
+        body: Center(
+          child: Container(
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.lightGreen,
+                  height: 200.0,
+                  width: 200.0,
+                  child: _image == null ? Text("Still waiting!") : Image.file(_image),),
+                FlatButton(
+                  color: Colors.deepOrangeAccent,
+                  child: Text("Open Camera", style: TextStyle(color: Colors.white),),
+                  onPressed: (){
+                    open_camera();
+                  },),
+                FlatButton(
+                  color: Colors.limeAccent,
+
+                  child:Text("Open Gallery", style: TextStyle(color: Colors.black),),
+                  onPressed: (){
+                    open_gallery();
+                  },
+                )
+              ],
+            ),
+          ),
+        )
+
+    );
+
   }
 }
