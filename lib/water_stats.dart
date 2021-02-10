@@ -1,9 +1,12 @@
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'email_login.dart';
+import 'dart:developer';
 class WaterStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -45,8 +48,16 @@ class AddPlant extends StatefulWidget {
 }
 
 class _AddPlant extends State {
+  FirebaseStorage storage = FirebaseStorage.instance;
+  FirebaseAuth currUser = FirebaseAuth.instance;
+  var user = FirebaseAuth.instance.currentUser;
+
+
+
 
   File _image;
+
+
   @override
   void initState() {
     super.initState();
@@ -55,22 +66,43 @@ class _AddPlant extends State {
   void open_camera()
   async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
+
     setState(() {
       _image = image;
     });
-
+    String fileName = _image.path;
+    Reference firebaseStorageRef =
+    FirebaseStorage.instance.ref().child('uploads/$fileName');
+    UploadTask uploadTask = firebaseStorageRef.putFile(_image);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    taskSnapshot.ref.getDownloadURL().then(
+          (value) => print("Done: $value"),
+    );
   }
   void open_gallery()
   async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
     setState(() {
       _image = image;
+
     });
+    String fileName = _image.path;
+    Reference firebaseStorageRef =
+    FirebaseStorage.instance.ref().child('uploads/$fileName');
+    UploadTask uploadTask = firebaseStorageRef.putFile(_image);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    taskSnapshot.ref.getDownloadURL().then(
+          (value) => print("Done: $value"),
+    );
   }
+
+
+
   @override
   Widget build(BuildContext context) {
 
-    var user = firebase.auth().currentUser;
+
     return Scaffold(
         appBar: AppBar(title: Text("Add plant profile"),
           backgroundColor: Colors.black45,),
@@ -78,6 +110,7 @@ class _AddPlant extends State {
           child: Container(
             child: Column(
               children: [
+
                 Container(
                   color: Colors.lightGreen,
                   height: 200.0,
@@ -96,7 +129,40 @@ class _AddPlant extends State {
                   onPressed: (){
                     open_gallery();
                   },
+                ),
+
+                Column(
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Plant species'
+                      ),
+                      onChanged: (text) {
+                        print("First text field: $text");
+                      },
+                    ),
+                    TextField(
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'plant notes'
+                      ),
+                      onChanged: (text) {
+                        print("First text field: $text");
+                      },
+                    ),
+                    TextField(
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'How often plant needs to be watered'
+                      ),
+                      onChanged: (text) {
+                        print("Number of : $text");
+                      },
+                    ),
+                  ],
                 )
+
               ],
             ),
           ),
