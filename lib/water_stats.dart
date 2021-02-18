@@ -93,7 +93,9 @@ class _WaterStatsState extends State<WaterStats> {
         child: _getScheduleForDay(),
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
-          border: Border.fromBorderSide(bottom),width: 2, color: Colors.black12),
+          border: Border(
+              left: BorderSide(width: 2, color: Colors.black12),
+              bottom: BorderSide(width: 2, color: Colors.black12)),
         ),
       ),
       _buildRoom(room1, plantImage1, plantName1, waterAmount1),
@@ -127,7 +129,11 @@ class _WaterStatsState extends State<WaterStats> {
   );
 
   Widget _buildVineView() => Container(
-
+    decoration: BoxDecoration(
+      border: Border(
+        right: BorderSide(width: 2, color: Colors.black12),
+      ),
+    ),
   );
 
   Widget _buildColumns() => Container(
