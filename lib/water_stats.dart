@@ -16,6 +16,18 @@ class _WaterStatsState extends State<WaterStats> {
   String day = "Today";
   String room1 = "Bedroom";
   String room2 = "Living Room";
+  /*Image plant1 = new Image.asset("assets/images/chamaedorea.jpg");
+  Image plant2 = new Image.asset("assets/images/planterina.jpg");*/
+  String plantImage1 = "assets/images/chamaedorea.jpg";
+  String plantImage2 = "assets/images/planterina.jpg";
+  String plantName1 = "Chamaedorea";
+  String plantName2 = "Planterina";
+  String waterAmount1 = "1 oz";
+  String waterAmount2 = "5 oz";
+
+  String dropdownValue = "Today";
+
+  int streak = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +35,7 @@ class _WaterStatsState extends State<WaterStats> {
     return MaterialApp(
       title: title,
       home: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
             title: Text(title),
           ),
@@ -32,20 +45,105 @@ class _WaterStatsState extends State<WaterStats> {
     );
   }
 
-  Widget _buildRoom() => ListView();
+  Widget _buildRoom(String roomName, String plantImage, String plantName, String waterAmount ) => Container(
+    child: Row(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(width: 2, color: Colors.green),
+          ),
+          margin: const EdgeInsets.all(4),
+          child: Image.asset(
+            plantImage,
+            height: 100,
+            width: 100,
+          ),
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  plantName,
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Text(
+                waterAmount,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
-  Widget _buildRoomView() => Column();
+  Widget _buildRoomView() => Column (
+    children: [
+      Container(
+        child: _getScheduleForDay(),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          border: Border.fromBorderSide(bottom),width: 2, color: Colors.black12),
+        ),
+      ),
+      _buildRoom(room1, plantImage1, plantName1, waterAmount1),
+      _buildRoom(room2, plantImage2, plantName2, waterAmount2)
+      ],
+  );
 
-  Widget _buildVineColumn() => Column();
+  Widget _getScheduleForDay() => DropdownButton(
+    value: dropdownValue,
+    icon: Icon(Icons.arrow_drop_down),
+    iconSize: 48,
+    elevation: 16,
+    style: TextStyle(
+      color: Colors.black87,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+
+    onChanged: (String newValue) {
+      setState(() {
+        dropdownValue = newValue;
+      });
+    },
+    items: <String>["Today", "Tomorrow", "Thursday", "Friday"]
+        .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+  );
+
+  Widget _buildVineView() => Container(
+
+  );
 
   Widget _buildColumns() => Container(
     decoration: BoxDecoration(
       color: Colors.black45,
     ),
-    child: Column(
+    child: Row(
       children: [
-        _buildVineColumn(),
-        _buildRoomView(),
+        Expanded(
+          flex: 3,
+          child: _buildVineView(),
+        ),
+        Expanded(
+          flex: 7,
+          child: _buildRoomView(),
+        ),
       ],
     ),
   );
