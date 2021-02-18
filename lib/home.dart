@@ -1,15 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:wada/water_stats.dart';
 import 'signup.dart';
-import 'dart:io';
-import 'dart:async';
 import 'dictionary.dart';
-import 'package:image_picker/image_picker.dart';
-import 'profile.dart';
-import 'placeholder_widget.dart';
 import 'water_stats.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'database.dart';
 class Home extends StatelessWidget {
   Home({this.uid});
   final String uid;
@@ -105,29 +101,41 @@ class _HomeState extends State<HomeState> {
 
 
 class MainPage extends StatelessWidget {
+
+
+  FirebaseAuth currUser = FirebaseAuth.instance;
+  var user = FirebaseAuth.instance.currentUser;
   @override
+
+
   Widget build(BuildContext context) {
     final title = 'Plants';
-
+    Query query =
+    FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
     return MaterialApp(
       title: title,
       home: Scaffold(
         appBar: AppBar(
           title: Text(title),
         ),
-        body: GridView.count(
-          // Create a grid with 2 columns. If you change the scrollDirection to
-          // horizontal, this produces 2 rows.
-          crossAxisCount: 1,
-          // Generate 100 widgets that display their index in the List.
-          children: List.generate(100, (index) {
-            return Center(
-              child: Text(
-                'Item $index',
-                style: Theme.of(context).textTheme.headline5,
-              ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: query.snapshots(),
+          builder: (context, stream) {
+            if (stream.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (stream.hasError) {
+              return Center(child: Text(stream.error.toString()));
+            }
+
+            QuerySnapshot querySnapshot = stream.data;
+
+            return ListView.builder(
+              itemCount: querySnapshot.size,
+              itemBuilder: (context, index) => Plants(querySnapshot.docs[index]),
             );
-          }),
+          },
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -146,3 +154,4 @@ class MainPage extends StatelessWidget {
   }
 
 }
+
