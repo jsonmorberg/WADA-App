@@ -3,15 +3,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:splashscreen/splashscreen.dart';
 
-class Watering extends StatefulWidget {
+class WaterStats extends StatefulWidget {
   final String name;
 
-  Watering({this.name});
+  WaterStats({this.name});
   @override
-  State<StatefulWidget> createState() => _WateringState();
+  State<StatefulWidget> createState() => _WaterStatsState();
 }
 
-class _WateringState extends State<Watering> {
+class _WaterStatsState extends State<WaterStats> {
   String title = 'Watering';
   String day = "Today";
   String room1 = "Bedroom";
@@ -88,17 +88,19 @@ class _WateringState extends State<Watering> {
   );
 
   Widget _buildRoomView() => Column (
-      children: [
+    children: [
       Container(
-      child: _getScheduleForDay(),
-  alignment: Alignment.centerLeft,
-  decoration: BoxDecoration(
-  border: Border.fromBorderSide(bottom),width: 2, color: Colors.black12),
-  ),
-  ),
-  _buildRoom(room1, plantImage1, plantName1, waterAmount1),
-  _buildRoom(room2, plantImage2, plantName2, waterAmount2)
-  ],
+        child: _getScheduleForDay(),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          border: Border(
+              left: BorderSide(width: 2, color: Colors.black12),
+              bottom: BorderSide(width: 2, color: Colors.black12)),
+        ),
+      ),
+      _buildRoom(room1, plantImage1, plantName1, waterAmount1),
+      _buildRoom(room2, plantImage2, plantName2, waterAmount2)
+    ],
   );
 
   Widget _getScheduleForDay() => DropdownButton(
@@ -127,7 +129,11 @@ class _WateringState extends State<Watering> {
   );
 
   Widget _buildVineView() => Container(
-
+    decoration: BoxDecoration(
+      border: Border(
+        right: BorderSide(width: 2, color: Colors.black12),
+      ),
+    ),
   );
 
   Widget _buildColumns() => Container(
