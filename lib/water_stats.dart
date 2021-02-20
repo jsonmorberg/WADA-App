@@ -9,6 +9,7 @@ import 'email_login.dart';
 import 'dart:developer';
 import 'package:firebase_database/firebase_database.dart';
 import 'database.dart';
+import 'services.dart';
 class WaterStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -50,12 +51,11 @@ class AddPlant extends StatefulWidget {
 }
 
 class _AddPlant extends State {
+
+
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
-
-
-
 
   File _image;
   String _species;
@@ -120,7 +120,6 @@ class _AddPlant extends State {
   void submitInfo()
   async {
     //this will take the insantiated image and upload it to the firebase database
-    String imgurl;
     String fileName = _image.path;
     Reference firebaseStorageRef =
     FirebaseStorage.instance.ref().child('uploads/$fileName');
@@ -129,7 +128,6 @@ class _AddPlant extends State {
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
     taskSnapshot.ref.getDownloadURL().then(
           (value) => print("Done: $value"),
-
     );
     await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);
 
@@ -140,8 +138,7 @@ class _AddPlant extends State {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController speciesController = TextEditingController();
-    TextEditingController plantNotes = TextEditingController();
+
     List<String> _locations = ['1', '2', '3', '4', '5', '6','7']; // Option 1
     var currentSelectedValue;
 
@@ -156,8 +153,8 @@ class _AddPlant extends State {
 
                 Container(
                   color: Colors.lightGreen,
-                  height: 200.0,
-                  width: 200.0,
+                  height: 150.0,
+                  width: 150.0,
                   child: _image == null ? Text("Still waiting!") : Image.file(_image),),
                 FlatButton(
                   color: Colors.deepOrangeAccent,
@@ -244,6 +241,7 @@ class _AddPlant extends State {
                       child: Text("Add plant", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
                       onPressed: (){
                         submitInfo();
+                        Navigator.pop(context);
                       },
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18.0),
@@ -251,6 +249,21 @@ class _AddPlant extends State {
                       ),
                       elevation: 5.0,
                       color: Colors.blue,
+                      textColor: Colors.white,
+                      padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
+                      splashColor: Colors.grey,
+                    ),
+                    RaisedButton(
+                      child: Text("Cancel", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.red)
+                      ),
+                      elevation: 5.0,
+                      color: Colors.red,
                       textColor: Colors.white,
                       padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
                       splashColor: Colors.grey,

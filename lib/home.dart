@@ -115,9 +115,6 @@ class MainPage extends StatelessWidget {
     return MaterialApp(
       title: title,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
         body: StreamBuilder<QuerySnapshot>(
           stream: query.snapshots(),
           builder: (context, stream) {
@@ -132,8 +129,12 @@ class MainPage extends StatelessWidget {
             QuerySnapshot querySnapshot = stream.data;
 
             return ListView.builder(
+
               itemCount: querySnapshot.size,
-              itemBuilder: (context, index) => Plants(querySnapshot.docs[index]),
+              itemBuilder: (context, index) {
+
+                return Plants(querySnapshot.docs[index]);
+              },
             );
           },
         ),
