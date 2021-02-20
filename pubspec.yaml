@@ -28,6 +28,7 @@ dependencies:
   flutter_signin_button: 1.1.0
   image_picker: ^0.6.7+22
   flutter_local_notifications: ^4.0.1
+  flutter_native_timezone: ^1.0.4
 
   flutter:
     sdk: flutter
