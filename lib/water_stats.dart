@@ -9,6 +9,18 @@ import 'email_login.dart';
 import 'dart:developer';
 import 'package:firebase_database/firebase_database.dart';
 import 'database.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'notification.dart';
+
+Future<TimeOfDay> _selectTime(BuildContext context, DateTime selectedTime) {
+
+  return showTimePicker(
+    context: context,
+    initialTime: TimeOfDay(hour: selectedTime.hour, minute: selectedTime.minute),
+  );
+}
+
 class WaterStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -54,7 +66,7 @@ class _AddPlant extends State {
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
 
-
+  DateTime selectedTime = DateTime.now();
 
 
   File _image;
@@ -62,6 +74,12 @@ class _AddPlant extends State {
   String _notes;
   String _frequency;
   int freq;
+  String currentSelectedValue;
+
+  String day;
+  String currentSelectedDay;
+  int hour;
+  int minute;
 
 
   @override
@@ -123,7 +141,7 @@ class _AddPlant extends State {
     String imgurl;
     String fileName = _image.path;
     Reference firebaseStorageRef =
-    FirebaseStorage.instance.ref().child('uploads/$fileName');
+      FirebaseStorage.instance.ref().child('uploads/$fileName');
     UploadTask uploadTask = firebaseStorageRef.putFile(_image);
     TaskSnapshot taskSnapshot = await uploadTask;
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
@@ -132,8 +150,6 @@ class _AddPlant extends State {
 
     );
     await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);
-
-
   }
 
 
@@ -142,8 +158,11 @@ class _AddPlant extends State {
   Widget build(BuildContext context) {
     TextEditingController speciesController = TextEditingController();
     TextEditingController plantNotes = TextEditingController();
-    List<String> _locations = ['1', '2', '3', '4', '5', '6','7']; // Option 1
-    var currentSelectedValue;
+
+    List<String> _locations = ['1', '2', '3', '4', '5', '6', '7'];
+
+    List<String> _days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
+      'Friday', 'Saturday','Sunday']; // Option 1
 
     return Scaffold(
         resizeToAvoidBottomPadding: false,
@@ -223,13 +242,17 @@ class _AddPlant extends State {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(20.0),
+                      padding: EdgeInsets.all(10.0),
                       child: DropdownButton<String>(
-                        hint: Text("Select Device"),
+                        //hint: Text("Select Device"),
                         value: currentSelectedValue,
                         isDense: true,
                         onChanged: (newValue) {
                           frequency(newValue);
+                          setState(() {
+                            currentSelectedValue = newValue;
+                            frequency(newValue);
+                          });
                         },
                         items: _locations.map((String value) {
                           return DropdownMenuItem<String>(
@@ -238,6 +261,50 @@ class _AddPlant extends State {
                           );
                         }).toList(),
                       ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Row(
+                        children: <Widget>[
+                          DropdownButton<String>(
+                            hint: Text("DAY"),
+                            value: currentSelectedDay,
+                            isDense: true,
+                            onChanged: (newValue) {
+
+                              setState(() {
+                                currentSelectedDay = newValue;
+                                day = currentSelectedDay;
+                              });
+                            },
+                            items: _days.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                          RaisedButton(
+                              child: Text(DateFormat('hh:mm aa').format(selectedTime)),
+                              onPressed: () async {
+                              final time = await _selectTime(context, selectedTime);
+                              if(time == null) return;
+
+                              setState(() {
+                                hour = time.hour;
+                                minute = time.minute;
+                                selectedTime = DateTime(
+                                  selectedTime.year,
+                                  selectedTime.month,
+                                  selectedTime.day,
+                                  time.hour,
+                                  time.minute
+                                );
+                              });
+                            }
+                          )
+                        ],
+                      )
                     ),
                     SizedBox(height: 20.0,),
                     RaisedButton(
