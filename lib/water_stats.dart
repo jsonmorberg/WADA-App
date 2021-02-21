@@ -65,9 +65,9 @@ class _AddPlant extends State {
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
-
   DateTime selectedTime = DateTime.now();
 
+  final NotificationPlugin _notificationPlugin = NotificationPlugin();
 
   File _image;
   String _species;
