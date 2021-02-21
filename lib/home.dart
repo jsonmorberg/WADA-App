@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:wada/water_stats.dart';
+import 'package:wada/watering.dart';
 import 'signup.dart';
 import 'dictionary.dart';
 import 'water_stats.dart';
@@ -60,7 +61,7 @@ class _HomeState extends State<HomeState> {
   final List<Widget> _children = [
     MainPage(),
     Dictionary(),
-    WaterStats()
+    Watering()
   ];
   @override
   Widget build(BuildContext context) {
@@ -79,8 +80,8 @@ class _HomeState extends State<HomeState> {
             title: Text('Dictionary'),
           ),
           new BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              title: Text('Water')
+              icon: Icon(Icons.stream),
+              title: Text('Watering')
           )
         ],
       ),
