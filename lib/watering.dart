@@ -16,8 +16,6 @@ class _WateringState extends State<Watering> {
   String day = "Today";
   String room1 = "Bedroom";
   String room2 = "Living Room";
-  /*Image plant1 = new Image.asset("assets/images/chamaedorea.jpg");
-  Image plant2 = new Image.asset("assets/images/planterina.jpg");*/
   String plantImage1 = "assets/images/chamaedorea.jpg";
   String plantImage2 = "assets/images/planterina.jpg";
   String plantName1 = "Chamaedorea";
@@ -90,6 +88,7 @@ class _WateringState extends State<Watering> {
   Widget _buildRoomView() => Column (
     children: [
       Container(
+        padding: const EdgeInsets.only(left: 15),
         child: _getScheduleForDay(),
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
@@ -113,7 +112,6 @@ class _WateringState extends State<Watering> {
       fontSize: 20,
       fontWeight: FontWeight.bold,
     ),
-
     onChanged: (String newValue) {
       setState(() {
         dropdownValue = newValue;
@@ -142,12 +140,12 @@ class _WateringState extends State<Watering> {
     ),
     child: Row(
       children: [
-        Expanded(
+        /*Expanded(
           flex: 3,
           child: _buildVineView(),
-        ),
+        ),*/
         Expanded(
-          flex: 7,
+          //flex: 7,
           child: _buildRoomView(),
         ),
       ],

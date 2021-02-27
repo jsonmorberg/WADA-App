@@ -1,14 +1,16 @@
 
+import 'package:direct_select_flutter/direct_select_container.dart';
+import 'package:direct_select_flutter/direct_select_item.dart';
+import 'package:direct_select_flutter/direct_select_list.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'email_login.dart';
-import 'dart:developer';
-import 'package:firebase_database/firebase_database.dart';
 import 'database.dart';
+import 'package:weekday_selector/weekday_selector.dart';
+
 class WaterStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -54,15 +56,23 @@ class _AddPlant extends State {
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
 
-
-
-
   File _image;
   String _species;
   String _notes;
   String _frequency;
+  String _room;
   int freq;
+  List<bool> _days;
 
+  final values = List.filled(7, false);
+  List<String> _rooms = [
+    "Living Room",
+    "Bedroom",
+    "Kitchen",
+    "Office",
+    "Bathroom"
+  ];
+  int selectedRoom = 0;
 
   @override
   void initState() {
@@ -84,27 +94,21 @@ class _AddPlant extends State {
 
     setState(() {
       _image = image;
-
     });
-
   }
 
   void species(species)
   async {
     setState(() {
       _species = species;
-
     });
-
   }
 
   void notes(notes)
   async {
     setState(() {
       _notes = notes;
-
     });
-
   }
 
   void frequency(frequency)
@@ -113,9 +117,21 @@ class _AddPlant extends State {
       _frequency = frequency;
       freq = int.parse(_frequency);
     });
-
   }
 
+  void days(days)
+  async {
+    setState(() {
+      _days = days;
+    });
+  }
+
+  void room(room)
+  async {
+    setState(() {
+      _room = room;
+    });
+  }
 
   void submitInfo()
   async {
@@ -129,14 +145,30 @@ class _AddPlant extends State {
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
     taskSnapshot.ref.getDownloadURL().then(
           (value) => print("Done: $value"),
-
     );
     await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);
-
-
+    //await DatabaseService(uid: user.uid).updateUserData(_species, _room, _days, _notes, downloadUrl);
   }
 
+  /* Start DirectSelect */
+  DirectSelectItem<String> getDropDownMenuItem(String value) {
+    return DirectSelectItem<String>(
+        itemHeight: 56,
+        value: value,
+        itemBuilder: (context, value) {
+          return Text(value);
+        });
+  }
 
+  _getDslDecoration() {
+    return BoxDecoration(
+      border: BorderDirectional(
+        bottom: BorderSide(width: 1, color: Colors.black12),
+        top: BorderSide(width: 1, color: Colors.black12),
+      ),
+    );
+  }
+  /* End DirectSelect */
 
   @override
   Widget build(BuildContext context) {
@@ -149,31 +181,50 @@ class _AddPlant extends State {
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(title: Text("Add plant profile"),
           backgroundColor: Colors.black45,),
-        body: Center(
+        body: DirectSelectContainer(
           child: Container(
+            padding: const EdgeInsets.only(top: 8, left: 8),
             child: Column(
               children: [
-
-                Container(
-                  color: Colors.lightGreen,
-                  height: 200.0,
-                  width: 200.0,
-                  child: _image == null ? Text("Still waiting!") : Image.file(_image),),
-                FlatButton(
-                  color: Colors.deepOrangeAccent,
-                  child: Text("Open Camera", style: TextStyle(color: Colors.white),),
-                  onPressed: (){
-                    open_camera();
-                  },),
-                FlatButton(
-                  color: Colors.limeAccent,
-
-                  child:Text("Open Gallery", style: TextStyle(color: Colors.black),),
-                  onPressed: (){
-                    open_gallery();
-                  },
+                Row(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      color: Colors.lightGreen,
+                      height: 200.0,
+                      width: 200.0,
+                      child: _image == null ? Text("Still waiting!", textAlign: TextAlign.center) : Image.file(_image),),
+                    Column (
+                      children: [
+                        Container(
+                          height: 100.0,
+                          width: 180.0,
+                          alignment: Alignment.center,
+                          child:
+                            FlatButton(
+                              color: Colors.deepOrangeAccent,
+                              child: Text("Open Camera", style: TextStyle(color: Colors.white),),
+                              onPressed: (){
+                                open_camera();
+                              },),
+                        ),
+                        Container(
+                          height: 100.0,
+                          width: 180.0,
+                          alignment: Alignment.center,
+                          child:
+                          FlatButton(
+                            color: Colors.limeAccent,
+                            child:Text("Open Gallery", style: TextStyle(color: Colors.black),),
+                            onPressed: (){
+                              open_gallery();
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
-
                 Column(
                   children: [
                     Padding(
@@ -200,6 +251,59 @@ class _AddPlant extends State {
                       ),
                     ),
                     Padding(
+                        child: Column(
+                          children: [
+                              Text(
+                              'Select Room\n',
+                              textAlign: TextAlign.left,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            DirectSelectList<String>(
+                                values: _rooms,
+                                /*onUserTappedListener: () {
+                                  _showScaffold();
+                                },*/
+                                defaultItemIndex:
+                                selectedRoom,
+                                itemBuilder: (String value) =>
+                                    getDropDownMenuItem(value),
+                                focusedItemDecoration:
+                                _getDslDecoration(),
+                                onItemSelectedListener:
+                                    (item, index, context) {
+                                  setState(() {
+                                    selectedRoom = index;
+                                  });
+                                }),
+                          ]
+                        ),
+                        padding: EdgeInsets.only(left: 22)
+                    ),
+                    Padding(
+                        padding: EdgeInsets.only(left:20.0, right: 20, bottom: 20),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Select Days to Water\n',
+                              textAlign: TextAlign.left,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            WeekdaySelector(
+                              firstDayOfWeek: defaultFirstDayOfWeek - 1,
+                              selectedFillColor: Colors.indigo,
+                              onChanged: (v) {
+                                setState(() {
+                                  values[v % 7] = !values[v % 7];
+                                });
+                              },
+                              values: values,
+                            ),
+                          ],
+                        )
+                    ),
+                    Padding(
                       padding: EdgeInsets.all(20.0),
                       child: TextFormField(
                         onChanged: (text) {
@@ -222,23 +326,6 @@ class _AddPlant extends State {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: DropdownButton<String>(
-                        hint: Text("Select Device"),
-                        value: currentSelectedValue,
-                        isDense: true,
-                        onChanged: (newValue) {
-                          frequency(newValue);
-                        },
-                        items: _locations.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),
-                    ),
                     SizedBox(height: 20.0,),
                     RaisedButton(
                       child: Text("Add plant", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
@@ -257,13 +344,10 @@ class _AddPlant extends State {
                     ),
                   ],
                 )
-
               ],
             ),
           ),
         )
-
     );
-
   }
 }

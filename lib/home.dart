@@ -99,10 +99,7 @@ class _HomeState extends State<HomeState> {
   }
 }
 
-
-
 class MainPage extends StatelessWidget {
-
 
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
@@ -111,8 +108,7 @@ class MainPage extends StatelessWidget {
 
   Widget build(BuildContext context) {
     final title = 'Plants';
-    Query query =
-    FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
+    Query query = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
     return MaterialApp(
       title: title,
       home: Scaffold(

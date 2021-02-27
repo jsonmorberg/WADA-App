@@ -40,7 +40,7 @@ class _ProfilePage extends State {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Add plant profile"),
+        appBar: AppBar(title: Text("Add Plant"),
           backgroundColor: Colors.black45,),
         body: Center(
           child: Container(
