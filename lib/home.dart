@@ -1,14 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:wada/water_stats.dart';
+import 'package:wada/watering.dart';
 import 'signup.dart';
-import 'dart:io';
-import 'dart:async';
 import 'dictionary.dart';
-import 'package:image_picker/image_picker.dart';
-import 'profile.dart';
-import 'placeholder_widget.dart';
+import 'water_stats.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'database.dart';
+
 class Home extends StatelessWidget {
   Home({this.uid});
   final String uid;
@@ -17,7 +16,6 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
         appBar: AppBar(
           title: Text(title),
           actions: <Widget>[
@@ -63,7 +61,7 @@ class _HomeState extends State<HomeState> {
   final List<Widget> _children = [
     MainPage(),
     Dictionary(),
-    WaterStats()
+    Watering()
   ];
   @override
   Widget build(BuildContext context) {
@@ -82,8 +80,8 @@ class _HomeState extends State<HomeState> {
             title: Text('Dictionary'),
           ),
           new BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              title: Text('Water')
+              icon: Icon(Icons.stream),
+              title: Text('Watering')
           )
         ],
       ),
@@ -101,32 +99,40 @@ class _HomeState extends State<HomeState> {
   }
 }
 
-
-
 class MainPage extends StatelessWidget {
+
+  FirebaseAuth currUser = FirebaseAuth.instance;
+  var user = FirebaseAuth.instance.currentUser;
   @override
+
+
   Widget build(BuildContext context) {
     final title = 'Plants';
-
+    Query query = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
     return MaterialApp(
       title: title,
       home: Scaffold(
         appBar: AppBar(
           title: Text(title),
         ),
-        body: GridView.count(
-          // Create a grid with 2 columns. If you change the scrollDirection to
-          // horizontal, this produces 2 rows.
-          crossAxisCount: 1,
-          // Generate 100 widgets that display their index in the List.
-          children: List.generate(100, (index) {
-            return Center(
-              child: Text(
-                'Item $index',
-                style: Theme.of(context).textTheme.headline5,
-              ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: query.snapshots(),
+          builder: (context, stream) {
+            if (stream.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (stream.hasError) {
+              return Center(child: Text(stream.error.toString()));
+            }
+
+            QuerySnapshot querySnapshot = stream.data;
+
+            return ListView.builder(
+              itemCount: querySnapshot.size,
+              itemBuilder: (context, index) => Plants(querySnapshot.docs[index]),
             );
-          }),
+          },
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -138,77 +144,9 @@ class MainPage extends StatelessWidget {
           tooltip: 'Increment',
           child: Icon(Icons.add),
         ),
-
-
       ),
     );
   }
 
 }
-class AddPlant extends StatefulWidget {
-  AddPlant({Key key}) : super(key: key);
 
-  @override
-  _AddPlant createState() => _AddPlant();
-}
-
-class _AddPlant extends State {
-
-  File _image;
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void open_camera()
-  async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
-    setState(() {
-      _image = image;
-    });
-
-  }
-  void open_gallery()
-  async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _image = image;
-    });
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text("Add plant profile"),
-          backgroundColor: Colors.black45,),
-        body: Center(
-          child: Container(
-            child: Column(
-              children: [
-                Container(
-                  color: Colors.lightGreen,
-                  height: 200.0,
-                  width: 200.0,
-                  child: _image == null ? Text("Still waiting!") : Image.file(_image),),
-                FlatButton(
-                  color: Colors.deepOrangeAccent,
-                  child: Text("Open Camera", style: TextStyle(color: Colors.white),),
-                  onPressed: (){
-                    open_camera();
-                  },),
-                FlatButton(
-                  color: Colors.limeAccent,
-
-                  child:Text("Open Gallery", style: TextStyle(color: Colors.black),),
-                  onPressed: (){
-                    open_gallery();
-                  },
-                )
-              ],
-            ),
-          ),
-        )
-
-    );
-
-  }
-}

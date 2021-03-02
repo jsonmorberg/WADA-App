@@ -7,6 +7,7 @@ import 'email_signup.dart';
 class SignUp extends StatelessWidget {
   final String title = "Sign Up";
   @override
+  //this builds the signup page
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -17,6 +18,7 @@ class SignUp extends StatelessWidget {
               Widget>[
             Padding(
               padding: EdgeInsets.all(10.0),
+
               child: Text("WADA",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
