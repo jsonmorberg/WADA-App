@@ -76,7 +76,7 @@ class Plants extends StatelessWidget {
       for (int i = 0; i < 7; i++) {
         print(plant['days'][i]);
         if (plant['days'][i] == true) {
-          s += d[i];
+          s += d[i] + " ";
         }
       }
     }
