@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:splashscreen/splashscreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+FirebaseAuth currUser = FirebaseAuth.instance;
+var user = FirebaseAuth.instance.currentUser;
+Query query = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
 
 class Watering extends StatefulWidget {
   final String name;
@@ -12,6 +15,7 @@ class Watering extends StatefulWidget {
 }
 
 class _WateringState extends State<Watering> {
+
   String title = 'Watering';
   String day = "Today";
   String room1 = "Bedroom";

@@ -7,6 +7,7 @@ import 'dictionary.dart';
 import 'water_stats.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database.dart';
+
 class Home extends StatelessWidget {
   Home({this.uid});
   final String uid;
@@ -143,8 +144,6 @@ class MainPage extends StatelessWidget {
           tooltip: 'Increment',
           child: Icon(Icons.add),
         ),
-
-
       ),
     );
   }
