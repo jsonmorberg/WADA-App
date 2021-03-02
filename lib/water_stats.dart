@@ -62,9 +62,10 @@ class _AddPlant extends State {
   String _frequency;
   String _room;
   int freq;
-  List<bool> _days;
+  var _days = [false,false,false,false,false,false,false];
 
   final values = List.filled(7, false);
+
   List<String> _rooms = [
     "Living Room",
     "Bedroom",
@@ -82,7 +83,6 @@ class _AddPlant extends State {
   Future<void> open_camera()
   async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
-
     setState(() {
       _image = image;
     });
@@ -91,7 +91,6 @@ class _AddPlant extends State {
   Future<void> open_gallery()
   async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-
     setState(() {
       _image = image;
     });
@@ -111,43 +110,35 @@ class _AddPlant extends State {
     });
   }
 
-  void frequency(frequency)
-  async {
-    setState(() {
-      _frequency = frequency;
-      freq = int.parse(_frequency);
-    });
-  }
-
   void days(days)
   async {
     setState(() {
-      _days = days;
+      _days = values;
     });
   }
 
   void room(room)
   async {
     setState(() {
-      _room = room;
+      _room = _rooms[selectedRoom];
     });
   }
 
   void submitInfo()
-  async {
-    //this will take the insantiated image and upload it to the firebase database
-    String imgurl;
-    String fileName = _image.path;
-    Reference firebaseStorageRef =
-    FirebaseStorage.instance.ref().child('uploads/$fileName');
-    UploadTask uploadTask = firebaseStorageRef.putFile(_image);
-    TaskSnapshot taskSnapshot = await uploadTask;
-    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-    taskSnapshot.ref.getDownloadURL().then(
-          (value) => print("Done: $value"),
-    );
-    await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);
-    //await DatabaseService(uid: user.uid).updateUserData(_species, _room, _days, _notes, downloadUrl);
+    async {
+      //this will take the insantiated image and upload it to the firebase database
+      String imgurl;
+      String fileName = _image.path;
+      Reference firebaseStorageRef =
+      FirebaseStorage.instance.ref().child('uploads/$fileName');
+      UploadTask uploadTask = firebaseStorageRef.putFile(_image);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      taskSnapshot.ref.getDownloadURL().then(
+            (value) => print("Done: $value"),
+      );
+      //await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);\
+      await DatabaseService(uid: user.uid).updateUserData(_species, _room, _days, _notes, downloadUrl);
   }
 
   /* Start DirectSelect */
@@ -253,7 +244,7 @@ class _AddPlant extends State {
                     Padding(
                         child: Column(
                           children: [
-                              Text(
+                            Text(
                               'Select Room\n',
                               textAlign: TextAlign.left,
                               overflow: TextOverflow.ellipsis,
@@ -265,16 +256,15 @@ class _AddPlant extends State {
                                   _showScaffold();
                                 },*/
                                 defaultItemIndex:
-                                selectedRoom,
+                                  selectedRoom,
                                 itemBuilder: (String value) =>
                                     getDropDownMenuItem(value),
                                 focusedItemDecoration:
                                 _getDslDecoration(),
                                 onItemSelectedListener:
                                     (item, index, context) {
-                                  setState(() {
-                                    selectedRoom = index;
-                                  });
+                                  selectedRoom = index;
+                                  room(selectedRoom);
                                 }),
                           ]
                         ),
@@ -296,6 +286,7 @@ class _AddPlant extends State {
                               onChanged: (v) {
                                 setState(() {
                                   values[v % 7] = !values[v % 7];
+                                  days(values);
                                 });
                               },
                               values: values,
