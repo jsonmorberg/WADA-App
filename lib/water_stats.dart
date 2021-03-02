@@ -169,6 +169,7 @@ class _AddPlant extends State {
     var currentSelectedValue;
 
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(title: Text("Add plant profile"),
           backgroundColor: Colors.black45,),
@@ -322,6 +323,7 @@ class _AddPlant extends State {
                       child: Text("Add plant", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
                       onPressed: (){
                         submitInfo();
+                        Navigator.pop(context);
                       },
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18.0),
@@ -339,6 +341,7 @@ class _AddPlant extends State {
             ),
           ),
         )
+
     );
   }
 }
