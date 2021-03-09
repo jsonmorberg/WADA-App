@@ -1,10 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'database.dart';
 
 FirebaseAuth currUser = FirebaseAuth.instance;
 var user = FirebaseAuth.instance.currentUser;
 Query query = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
+
+var roomset = <String>{};
 
 class Watering extends StatefulWidget {
   final String name;
@@ -16,119 +20,118 @@ class Watering extends StatefulWidget {
 
 class _WateringState extends State<Watering> {
 
+  String today = new DateFormat('EEEE').format(DateTime.now());
   String title = 'Watering';
-  String day = "Today";
-  String room1 = "Bedroom";
-  String room2 = "Living Room";
-  String plantImage1 = "assets/images/chamaedorea.jpg";
-  String plantImage2 = "assets/images/planterina.jpg";
-  String plantName1 = "Chamaedorea";
-  String plantName2 = "Planterina";
-  String waterAmount1 = "1 oz";
-  String waterAmount2 = "5 oz";
-
-  String dropdownValue = "Today";
-
   int streak = 0;
+
+  int getDayIndex() {
+    int dayInt;
+    switch (today) {
+      case "Sunday":    dayInt = 0; break;
+      case "Monday":    dayInt = 1; break;
+      case "Tuesday":   dayInt = 2; break;
+      case "Wednesday": dayInt = 3; break;
+      case "Thursday":  dayInt = 4; break;
+      case "Friday":    dayInt = 5; break;
+      case "Saturday":  dayInt = 6; break;
+    }
+    return dayInt;
+  }
+
+  void getRooms() {
+    query
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+          querySnapshot.docs.forEach((doc) {
+            if (doc['days'][getDayIndex()]) {
+              roomset.add(doc['room']);
+            }
+          })
+      });
+  }
+
+  /* Function 2: Contains room title and all plants within it */
+  Widget buildRoomTile (String room) {
+    return new Column (
+      children: <Widget>[
+        Container (
+          padding: const EdgeInsets.only(left: 8, top:8, bottom:8),
+          child: Text(
+            room,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+            border: Border(
+                top: BorderSide(width: 2, color: Colors.black12),
+                left: BorderSide(width: 2, color: Colors.black12),
+                bottom: BorderSide(width: 2, color: Colors.black12)),
+          ),
+          height: 50,
+        ),
+        plantTitleAndPlants(room)
+      ],
+    );
+  }
+
+  Widget plantTitleAndPlants(String room) {
+    Stream s = query
+        .where('room', isEqualTo: room)
+        .snapshots();
+    return StreamBuilder<QuerySnapshot>(
+      stream: s,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return Text('Something went wrong');
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text("Loading");
+        }
+        return new ListView(
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          padding: const EdgeInsets.only(left: 8, top:8, bottom:8),
+          children:
+          snapshot.data.docs.map((DocumentSnapshot document) {
+            if (document != null && document.data().containsValue(room)) {
+              return Plants(document);
+            }
+          }).toList(),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-
+    getRooms();
     return MaterialApp(
       title: title,
       home: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.white70,
           appBar: AppBar(
-            title: Text(title),
+            title: Text(
+              "Watering for " + today + " "
+                  + DateFormat.yMMMMd('en_US').format(DateTime.now()),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-          body: Center(child: _buildColumns(),
+          body: ListView (
+            children: <Widget>[
+              for (var room in roomset) buildRoomTile(room)
+            ],
           )
       ),
     );
   }
-
-  Widget _buildRoom(String roomName, String plantImage, String plantName, String waterAmount ) => Container(
-    child: Row(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(width: 2, color: Colors.green),
-          ),
-          margin: const EdgeInsets.all(4),
-          child: Image.asset(
-            plantImage,
-            height: 100,
-            width: 100,
-          ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  plantName,
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Text(
-                waterAmount,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
-  Widget _buildRoomView() => Column (
-    children: [
-      Container(
-        padding: const EdgeInsets.only(left: 15),
-        child: _getScheduleForDay(),
-        alignment: Alignment.centerLeft,
-        decoration: BoxDecoration(
-          border: Border(
-              left: BorderSide(width: 2, color: Colors.black12),
-              bottom: BorderSide(width: 2, color: Colors.black12)),
-        ),
-      ),
-      _buildRoom(room1, plantImage1, plantName1, waterAmount1),
-      _buildRoom(room2, plantImage2, plantName2, waterAmount2)
-    ],
-  );
-
-  Widget _getScheduleForDay() => DropdownButton(
-    value: dropdownValue,
-    icon: Icon(Icons.arrow_drop_down),
-    iconSize: 48,
-    elevation: 16,
-    style: TextStyle(
-      color: Colors.black87,
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-    ),
-    onChanged: (String newValue) {
-      setState(() {
-        dropdownValue = newValue;
-      });
-    },
-    items: <String>["Today", "Tomorrow", "Thursday", "Friday"]
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList(),
-  );
 
   Widget _buildVineView() => Container(
     decoration: BoxDecoration(
@@ -137,23 +140,4 @@ class _WateringState extends State<Watering> {
       ),
     ),
   );
-
-  Widget _buildColumns() => Container(
-    decoration: BoxDecoration(
-      color: Colors.black45,
-    ),
-    child: Row(
-      children: [
-        /*Expanded(
-          flex: 3,
-          child: _buildVineView(),
-        ),*/
-        Expanded(
-          //flex: 7,
-          child: _buildRoomView(),
-        ),
-      ],
-    ),
-  );
-
 }

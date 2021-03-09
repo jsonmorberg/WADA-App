@@ -42,7 +42,7 @@ class Plants extends StatelessWidget {
           children: [
             name,
             room,
-            notes,
+            if (plant['notes'] != null) notes,
             days,
           ],
         ));
@@ -82,7 +82,6 @@ class Plants extends StatelessWidget {
     String s = "";
     if (plant['days'] != null) {
       for (int i = 0; i < 7; i++) {
-        print(plant['days'][i]);
         if (plant['days'][i] == true) {
           s += d[i] + " ";
         }
@@ -93,7 +92,6 @@ class Plants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
         onTap: (){
           Navigator.push(
@@ -102,14 +100,19 @@ class Plants extends StatelessWidget {
           );
         },
         child: Container(
-          padding: const EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.only(left: 5, bottom: 8),
           child: Row(
-            children: [poster, Flexible(child: details)],
+            children: [
+              poster,
+              Flexible(child: details),
+            ],
           ),
-        ));
-
+        )
+    );
   }
 }
+
+
 
 class DatabaseService {
   final String uid;
@@ -131,8 +134,6 @@ class DatabaseService {
 
   }
 
-
-
   Future<void> editUserData(String name, String room, List<bool> days,
       String notes, String img, String ID) async {
     DocumentReference docPlants = plantCollection.doc(uid);
@@ -144,11 +145,7 @@ class DatabaseService {
       'days' : days,
       'room' : room,
     });
-
-
-
   }
-
 
   Future<void> deletePlant(String name, String room, List<bool> days,
       String notes, String ID) async {
@@ -184,7 +181,6 @@ class _EditPlant extends State {
   io.File _image;
   String _species;
   String _notes;
-  String _frequency;
   String _room;
   int freq;
   var _days = [false, false, false, false, false, false, false];
@@ -289,7 +285,6 @@ class _EditPlant extends State {
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        resizeToAvoidBottomPadding: false,
         body: SingleChildScrollView(
             child: DirectSelectContainer(
               child: Container(

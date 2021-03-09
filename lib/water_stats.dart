@@ -170,8 +170,6 @@ class _AddPlant extends State {
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        resizeToAvoidBottomPadding: false,
-
         appBar: AppBar(title: Text("Add plant profile"),
           backgroundColor: Colors.black45,),
         body: DirectSelectContainer(
