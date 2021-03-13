@@ -8,6 +8,47 @@ import 'water_stats.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database.dart';
 import 'package:audioplayers/audio_cache.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+void configureLocalTimeZone() async {
+  tz.initializeTimeZones();
+  final String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
+}
+
+void scheduleDailyTenAMNotification() async {
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+      0,
+      'WADA',
+      'Time to water',
+      _nextInstanceOfTenAM(),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+            'daily notification channel id',
+            'daily notification channel name',
+            'daily notification description'),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time);
+}
+
+tz.TZDateTime _nextInstanceOfTenAM() {
+  final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+  tz.TZDateTime scheduledDate =
+  tz.TZDateTime(tz.local, now.year, now.month, now.day, 10);
+  if (scheduledDate.isBefore(now)) {
+    scheduledDate = scheduledDate.add(const Duration(days: 1));
+  }
+  return scheduledDate;
+}
 
 class Home extends StatelessWidget {
   Home({this.uid});
@@ -54,6 +95,34 @@ class HomeState extends StatefulWidget {
 
 /// This is the private State class that goes with MyStatefulWidget.
 class _HomeState extends State<HomeState> {
+
+  void initState(){
+    super.initState();
+
+    configureLocalTimeZone();
+    scheduleDailyTenAMNotification();
+
+    var initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher.png');
+
+    var initializationSettingsIOS =
+    IOSInitializationSettings();
+
+    var initSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    flutterLocalNotificationsPlugin.initialize(
+        initSettings, onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return NotificationScreen(
+        payload: payload,
+      );
+    }));
+  }
+
   int _currentIndex = 0;
   final List<Widget> _children = [MainPage(), Dictionary(), Watering()];
   @override
@@ -140,6 +209,24 @@ class MainPage extends StatelessWidget {
           tooltip: 'Increment',
           child: Icon(Icons.add),
         ),
+      ),
+    );
+  }
+}
+
+
+class NotificationScreen extends StatelessWidget {
+  String payload;
+
+  NotificationScreen({
+    @required this.payload,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(payload),
       ),
     );
   }

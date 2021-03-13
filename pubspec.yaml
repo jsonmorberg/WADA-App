@@ -21,6 +21,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  flutter_native_timezone: ^1.0.10
   audioplayers: ^0.17.4
   cloud_firestore: ^0.16.0
   direct_select_flutter: ^1.0.7
