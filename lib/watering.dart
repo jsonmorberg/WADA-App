@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'database.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 FirebaseAuth currUser = FirebaseAuth.instance;
 var user = FirebaseAuth.instance.currentUser;
@@ -23,6 +24,8 @@ class _WateringState extends State<Watering> {
   String today = new DateFormat('EEEE').format(DateTime.now());
   String title = 'Watering';
   bool v = false;
+
+  AudioPlayer audioPlayer = AudioPlayer();
 
   int getDayIndex() {
     int dayInt;
@@ -125,6 +128,13 @@ class _WateringState extends State<Watering> {
   @override
   Widget build(BuildContext context) {
     getRooms();
+    play() async {
+      int result = await audioPlayer.play("https://huds.tf/site/xthreads_attach.php/3666_1615030581_f8449030/2311a5ffe515b5a535867a8d1f0869e7/yup.wav");
+      if (result == 1) {
+        print("success");
+      }
+    }
+    play();
     return MaterialApp(
       title: title,
       home: Scaffold(
@@ -142,7 +152,7 @@ class _WateringState extends State<Watering> {
           ),
           body: ListView (
             children: <Widget>[
-              for (var room in roomset) buildRoomTile(room)
+              for (var room in roomset) if (room != null) buildRoomTile(room)
             ],
           )
       ),

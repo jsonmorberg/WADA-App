@@ -7,14 +7,18 @@ import 'dictionary.dart';
 import 'water_stats.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database.dart';
+import 'package:audioplayers/audio_cache.dart';
 
 class Home extends StatelessWidget {
   Home({this.uid});
   final String uid;
   final String title = "Home";
+  final player = AudioCache();
 
   @override
   Widget build(BuildContext context) {
+    player.loadAll(['yup.wav', 'wada_better.mp3']);
+    player.play("wada_better.mp3");
     return Scaffold(
         appBar: AppBar(
           title: Text(title),
