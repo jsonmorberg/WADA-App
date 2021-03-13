@@ -22,7 +22,7 @@ class _WateringState extends State<Watering> {
 
   String today = new DateFormat('EEEE').format(DateTime.now());
   String title = 'Watering';
-  int streak = 0;
+  bool v = false;
 
   int getDayIndex() {
     int dayInt;
@@ -47,7 +47,7 @@ class _WateringState extends State<Watering> {
               roomset.add(doc['room']);
             }
           })
-      });
+        });
   }
 
   /* Function 2: Contains room title and all plants within it */
@@ -97,17 +97,24 @@ class _WateringState extends State<Watering> {
           padding: const EdgeInsets.only(left: 8, top:8, bottom:8),
           children:
           snapshot.data.docs.map((DocumentSnapshot document) {
-            /*if (document != null) {
-              print(document.data()['days'][getDayIndex()]);
-              print(document.data().toString());
-            }*/
             if (document != null
                 && document.data().containsValue(room)
                 && document.data()['days'][getDayIndex()] != false) {
-              return Plants(document);
+              return Row(
+                children: [
+                  Checkbox(
+                    value: document.data()['watered'],
+                    onChanged: (value) {
+                      setState(() {
+                        document.data()['watered'] = !document.data()['watered'];
+                      });
+                    },),
+                  Expanded(child: Plants.wateringView(document, true)),
+                ],
+              );
             }
             else {
-              return Text('');
+              return SizedBox( width: 0, height:0);
             }
           }).toList(),
         );

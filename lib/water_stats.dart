@@ -1,4 +1,3 @@
-
 import 'package:direct_select_flutter/direct_select_container.dart';
 import 'package:direct_select_flutter/direct_select_item.dart';
 import 'package:direct_select_flutter/direct_select_list.dart';
@@ -10,6 +9,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'database.dart';
 import 'package:weekday_selector/weekday_selector.dart';
+import 'package:location/location.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:intl/intl.dart';
 
 class WaterStats extends StatelessWidget {
   @override
@@ -52,9 +55,20 @@ class AddPlant extends StatefulWidget {
 }
 
 class _AddPlant extends State {
+
+
+
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
+  //location
+  LocationData _currentPosition;
+  String _address,_dateTime;
+  GoogleMapController mapController;
+  Marker marker;
+  Location location = Location();
+  GoogleMapController _controller;
+  LatLng _initialcameraposition = LatLng(0.5937, 0.9629);
 
   File _image;
   String _species;
@@ -76,8 +90,58 @@ class _AddPlant extends State {
   int selectedRoom = 0;
 
   @override
+
+  getLoc() async{
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _currentPosition = await location.getLocation();
+    _initialcameraposition = LatLng(_currentPosition.latitude,_currentPosition.longitude);
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      print("${currentLocation.longitude} : ${currentLocation.longitude}");
+      setState(() {
+        _currentPosition = currentLocation;
+        _initialcameraposition = LatLng(_currentPosition.latitude,_currentPosition.longitude);
+
+        DateTime now = DateTime.now();
+        _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
+        _getAddress(_currentPosition.latitude, _currentPosition.longitude)
+            .then((value) {
+          setState(() {
+            _address = "${value.first.addressLine}";
+
+          });
+        });
+      });
+    });
+  }
+
+  Future<List<Address>> _getAddress(double lat, double lang) async {
+    final coordinates = new Coordinates(lat, lang);
+    List<Address> add =
+    await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    return add;
+  }
+
   void initState() {
     super.initState();
+    getLoc();
   }
 
   Future<void> open_camera()
@@ -125,20 +189,20 @@ class _AddPlant extends State {
   }
 
   void submitInfo()
-    async {
-      //this will take the insantiated image and upload it to the firebase database
-      String imgurl;
-      String fileName = _image.path;
-      Reference firebaseStorageRef =
-      FirebaseStorage.instance.ref().child('uploads/$fileName');
-      UploadTask uploadTask = firebaseStorageRef.putFile(_image);
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-      taskSnapshot.ref.getDownloadURL().then(
-            (value) => print("Done: $value"),
-      );
-      //await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);\
-      await DatabaseService(uid: user.uid).updateUserData(_species, _room, _days, _notes, downloadUrl);
+  async {
+    //this will take the insantiated image and upload it to the firebase database
+    String imgurl;
+    String fileName = _image.path;
+    Reference firebaseStorageRef =
+    FirebaseStorage.instance.ref().child('uploads/$fileName');
+    UploadTask uploadTask = firebaseStorageRef.putFile(_image);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    taskSnapshot.ref.getDownloadURL().then(
+          (value) => print("Done: $value"),
+    );
+    //await DatabaseService(uid: user.uid).updateUserData(_species, _notes, freq, downloadUrl);\
+    await DatabaseService(uid: user.uid).updateUserData(_species, _room, _days, _notes, downloadUrl, _currentPosition.latitude.toInt(), _currentPosition.longitude.toInt());
   }
 
   /* Start DirectSelect */
@@ -192,12 +256,12 @@ class _AddPlant extends State {
                           width: 180.0,
                           alignment: Alignment.center,
                           child:
-                            FlatButton(
-                              color: Colors.deepOrangeAccent,
-                              child: Text("Open Camera", style: TextStyle(color: Colors.white),),
-                              onPressed: (){
-                                open_camera();
-                              },),
+                          FlatButton(
+                            color: Colors.deepOrangeAccent,
+                            child: Text("Open Camera", style: TextStyle(color: Colors.white),),
+                            onPressed: (){
+                              open_camera();
+                            },),
                         ),
                         Container(
                           height: 100.0,
@@ -243,30 +307,30 @@ class _AddPlant extends State {
                     ),
                     Padding(
                         child: Column(
-                          children: [
-                            Text(
-                              'Select Room\n',
-                              textAlign: TextAlign.left,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            DirectSelectList<String>(
-                                values: _rooms,
-                                /*onUserTappedListener: () {
+                            children: [
+                              Text(
+                                'Select Room\n',
+                                textAlign: TextAlign.left,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              DirectSelectList<String>(
+                                  values: _rooms,
+                                  /*onUserTappedListener: () {
                                   _showScaffold();
                                 },*/
-                                defaultItemIndex:
+                                  defaultItemIndex:
                                   selectedRoom,
-                                itemBuilder: (String value) =>
-                                    getDropDownMenuItem(value),
-                                focusedItemDecoration:
-                                _getDslDecoration(),
-                                onItemSelectedListener:
-                                    (item, index, context) {
-                                  selectedRoom = index;
-                                  room(selectedRoom);
-                                }),
-                          ]
+                                  itemBuilder: (String value) =>
+                                      getDropDownMenuItem(value),
+                                  focusedItemDecoration:
+                                  _getDslDecoration(),
+                                  onItemSelectedListener:
+                                      (item, index, context) {
+                                    selectedRoom = index;
+                                    room(selectedRoom);
+                                  }),
+                            ]
                         ),
                         padding: EdgeInsets.only(left: 22)
                     ),

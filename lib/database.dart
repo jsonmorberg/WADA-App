@@ -4,17 +4,20 @@ import 'package:direct_select_flutter/direct_select_container.dart';
 import 'package:direct_select_flutter/direct_select_item.dart';
 import 'package:direct_select_flutter/direct_select_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:weekday_selector/weekday_selector.dart';
+
 class Plants extends StatelessWidget {
   /// Contains all snapshot data for a given movie.
   final DocumentSnapshot snapshot;
+  bool watering = false;
 
   /// Initialize a [Move] instance with a given [DocumentSnapshot].
   Plants(this.snapshot);
+  Plants.wateringView(this.snapshot, this.watering);
 
   /// Returns the [DocumentSnapshot] data as a a [Map].
   Map<String, dynamic> get plant {
@@ -92,35 +95,54 @@ class Plants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: (){
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => EditPlant(reqid: snapshot.id,)),
-          );
-        },
-        child: Container(
+    return Container(
           padding: const EdgeInsets.only(left: 5, bottom: 8),
           child: Row(
             children: [
-              poster,
+             GestureDetector(
+               onTap: (){
+                 Navigator.push(
+                   context,
+                   MaterialPageRoute(builder: (context) => EditPlant(reqid: snapshot.id,)),
+                 );},
+               child: poster,
+             ),
               Flexible(child: details),
             ],
           ),
-        )
-    );
+        );
   }
 }
-
-
 
 class DatabaseService {
   final String uid;
   DatabaseService({ this.uid });
   final CollectionReference plantCollection = FirebaseFirestore.instance.collection('users');
 
+  Future<Set<Marker>> getLocations() async {
+    DocumentReference docPlants = plantCollection.doc(uid);
+    CollectionReference numerAtion = docPlants.collection('plants');
+    //get the number of plants in the snapshot
+    Set<Marker> markers = Set();
+    int numerator = 0;
+    numerAtion
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+      querySnapshot.docs.forEach((doc) {
+        if (doc['longitude']) {
+          markers.add(Marker(
+            markerId: MarkerId('marker' + numerator.toString()),
+            position: LatLng(doc['longitude'], doc['latitude']),
+          ),);
+          numerator+=1;
+        }
+      })
+    });
+    return await markers;
+  }
+
   Future<void> updateUserData(String name, String room, List<bool> days,
-      String notes, String img) async {
+      String notes, String img, int latitude, int longitude) async {
     DocumentReference docPlants = plantCollection.doc(uid);
     CollectionReference numerAtion = docPlants.collection('plants');
     String randomID = UniqueKey().toString();
@@ -130,8 +152,9 @@ class DatabaseService {
       'imgurl' : img,
       'days' : days,
       'room' : room,
+      'latitude' : latitude,
+      'longitude' : longitude,
     });
-
   }
 
   Future<void> editUserData(String name, String room, List<bool> days,
