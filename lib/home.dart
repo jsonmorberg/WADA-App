@@ -20,37 +20,31 @@ class Home extends StatelessWidget {
     player.loadAll(['yup.wav', 'wada_better.mp3']);
     player.play("wada_better.mp3");
     return Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.exit_to_app,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                FirebaseAuth auth = FirebaseAuth.instance;
-                auth.signOut().then((res) {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignUp()),
-                          (Route<dynamic> route) => false);
-                });
-              },
-            )
-
-          ],
-
-        ),
-        body: Center(
-
-          child: HomeState()
-
-        ),
-
-        );
+      appBar: AppBar(
+        title: Text(title),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              FirebaseAuth auth = FirebaseAuth.instance;
+              auth.signOut().then((res) {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUp()),
+                    (Route<dynamic> route) => false);
+              });
+            },
+          )
+        ],
+      ),
+      body: Center(child: HomeState()),
+    );
   }
 }
+
 class HomeState extends StatefulWidget {
   HomeState({Key key}) : super(key: key);
 
@@ -60,13 +54,8 @@ class HomeState extends StatefulWidget {
 
 /// This is the private State class that goes with MyStatefulWidget.
 class _HomeState extends State<HomeState> {
-
   int _currentIndex = 0;
-  final List<Widget> _children = [
-    MainPage(),
-    Dictionary(),
-    Watering()
-  ];
+  final List<Widget> _children = [MainPage(), Dictionary(), Watering()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,23 +69,25 @@ class _HomeState extends State<HomeState> {
             title: Text('Plants'),
           ),
           new BottomNavigationBarItem(
-            icon: Icon(Icons.mail),
-            title: Text('Dictionary'),
+            icon: Icon(Icons.map),
+            title: Text('Map'),
           ),
           new BottomNavigationBarItem(
-              icon: Icon(Icons.stream),
-              title: Text('Watering')
-          )
+              icon: Icon(Icons.stream), title: Text('Watering'))
         ],
       ),
     );
   }
+
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
-      if(_currentIndex == 0) {
+      if (_currentIndex == 0) {
         Widget build(BuildContext context) {
-          Text("text", textAlign: TextAlign.center,);
+          Text(
+            "text",
+            textAlign: TextAlign.center,
+          );
         }
       }
     });
@@ -104,15 +95,15 @@ class _HomeState extends State<HomeState> {
 }
 
 class MainPage extends StatelessWidget {
-
   FirebaseAuth currUser = FirebaseAuth.instance;
   var user = FirebaseAuth.instance.currentUser;
   @override
-
-
   Widget build(BuildContext context) {
     final title = 'Plants';
-    Query query = FirebaseFirestore.instance.collection('users').doc(user.uid).collection('plants');
+    Query query = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('plants');
     return MaterialApp(
       title: title,
       home: Scaffold(
@@ -134,7 +125,8 @@ class MainPage extends StatelessWidget {
 
             return ListView.builder(
               itemCount: querySnapshot.size,
-              itemBuilder: (context, index) => Plants(querySnapshot.docs[index]),
+              itemBuilder: (context, index) =>
+                  Plants(querySnapshot.docs[index]),
             );
           },
         ),
@@ -151,6 +143,4 @@ class MainPage extends StatelessWidget {
       ),
     );
   }
-
 }
-
