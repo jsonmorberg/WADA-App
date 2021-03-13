@@ -160,9 +160,7 @@ class DatabaseService {
     CollectionReference numerAtion = docPlants.collection('plants');
     //get the number of plants in the snapshot
     numerAtion.snapshots().length.toString();
-
   }
-
 }
 
 

@@ -97,8 +97,17 @@ class _WateringState extends State<Watering> {
           padding: const EdgeInsets.only(left: 8, top:8, bottom:8),
           children:
           snapshot.data.docs.map((DocumentSnapshot document) {
-            if (document != null && document.data().containsValue(room)) {
+            /*if (document != null) {
+              print(document.data()['days'][getDayIndex()]);
+              print(document.data().toString());
+            }*/
+            if (document != null
+                && document.data().containsValue(room)
+                && document.data()['days'][getDayIndex()] != false) {
               return Plants(document);
+            }
+            else {
+              return Text('');
             }
           }).toList(),
         );
