@@ -105,13 +105,13 @@ class _WateringState extends State<Watering> {
                 && document.data()['days'][getDayIndex()] != false) {
               return Row(
                 children: [
-                  Checkbox(
+                  /*Checkbox(
                     value: document.data()['watered'],
                     onChanged: (value) {
                       setState(() {
                         document.data()['watered'] = !document.data()['watered'];
                       });
-                    },),
+                    },),*/
                   Expanded(child: Plants.wateringView(document, true)),
                 ],
               );
